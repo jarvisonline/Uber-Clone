@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const userSchema = new mongoose.Schema({
+const captainSchema = new mongoose.Schema({
   fullname: {
     firstname: {
       type: String,
@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
     },
     vehicleType: {
       type: String,
-      required: True,
+      required: true,
       enum: ["car", "motorcycle", "auto"],
     },
   },
@@ -71,7 +71,7 @@ captainSchema.methods.generateAuthToken = function () {
     {
       _id: this._id,
     },
-    process.env.JWT_SECRET,
+    process.env.JWT_KEY,
     { expiresIn: "24h" }
   );
   return token;

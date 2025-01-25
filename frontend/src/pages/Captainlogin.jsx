@@ -1,16 +1,44 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useContext } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing eye icons
+import { CaptainDataContext } from "../context/CaptainContext";
 
 const Captainlogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [captainData, setcaptainData] = useState({});
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const { captain, setCaptain } = useContext(CaptainDataContext);
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const captain = {
+      email: email,
+      password: password,
+    };
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/captains/login`,
+      captain
+    );
+    if (response.status === 200) {
+      const data = response.data;
+      localStorage.setItem("token", data.token);
+      setCaptain(data.captain);
+      navigate("/captain-home");
+    }
+
+    setEmail("");
+    setPassword("");
+  };
+
   return (
     <div className="p-7 h-screen flex flex-col justify-between">
       <div>
@@ -21,18 +49,7 @@ const Captainlogin = () => {
             alt=""
           />
         </Link>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setcaptainData({
-              email: email,
-              password: password,
-            });
-
-            setEmail("");
-            setPassword("");
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <h3 className="text-lg font-medium mb-2 ">What's your email</h3>
           <input
             type="email"

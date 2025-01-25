@@ -1,8 +1,35 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { data, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing eye icons
+import { UserDataContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import axios from "axios";
 
 const UserLogin = () => {
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(UserDataContext);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const userData = {
+      email: email,
+      password: password,
+    };
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/users/login`,
+      userData
+    );
+    if (response.status === 200) {
+      const data = response.data;
+      setUser(data.user);
+      localStorage.setItem("token", data.token);
+      navigate("/home");
+    }
+    setEmail("");
+    setPassword("");
+  };
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userData, setuserData] = useState({});
@@ -22,17 +49,7 @@ const UserLogin = () => {
             alt=""
           />
         </Link>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setuserData({
-              email: email,
-              password: password,
-            });
-            setEmail("");
-            setPassword("");
-          }}
-        >
+        <form onSubmit={handleLogin}>
           <h3 className="text-lg font-medium mb-2 ">What's your email</h3>
           <input
             type="email"
