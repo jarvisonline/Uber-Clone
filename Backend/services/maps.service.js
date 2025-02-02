@@ -1,23 +1,31 @@
 const axios = require("axios");
 
-module.exports.getAddressCorrdinate = async (address) => {
-  const apiKey = ProcessingInstruction.env.GOOGLE_MAPS_API;
+module.exports.getAddressCoordinate = async (address) => {
+  const apiKey = process.env.GOOGLE_MAPS_API;
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
     address
   )}&key=${apiKey}`;
+
+  console.debug(`Fetching coordinates for address: ${address}`);
+  console.debug(`Constructed URL: ${url}`);
+
   try {
     const response = await axios.get(url);
+    console.debug(`Response received: ${JSON.stringify(response.data)}`);
+
     if (response.data.status === "OK") {
       const location = response.data.results[0].geometry.location;
+      console.debug(`Coordinates found: ${JSON.stringify(location)}`);
       return {
-        ltd: location.ltd,
+        ltd: location.lat,
         lng: location.lng,
       };
     } else {
+      console.warn(`API returned status: ${response.data.status}`);
       throw new Error("Unable to fetch coordinates");
     }
   } catch (error) {
-    console.error(error);
+    console.error(`Error fetching coordinates: ${error.message}`);
     throw error;
   }
 };
@@ -26,7 +34,7 @@ module.exports.getDistanceTime = async (origin, destination) => {
   if (!origin || !destination) {
     throw new Error("Origin and destination are required");
   }
-  const apiKey = ProcessingInstruction.env.GOOGLE_MAPS_API;
+  const apiKey = process.env.GOOGLE_MAPS_API;
 
   const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
     origin
@@ -59,7 +67,7 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
   try {
     const response = await axios.get(url);
     if (response.data.status === "OK") {
-      return response.data.status.predictions;
+      return response.data.predictions;
     } else {
       throw new Error("Unable to fetch suggestions");
     }
